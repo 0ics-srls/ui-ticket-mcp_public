@@ -8,17 +8,17 @@ You click on elements, write review comments like "This button should be blue" o
 
 ```mermaid
 sequenceDiagram
-    actor You as 👤 You
-    participant App as 🌐 Your App
-    actor AI as 🤖 AI Agent
+    actor You
+    participant App as Your App
+    actor AI as AI Agent
 
-    You->>App: See something wrong? Click on it.
+    You->>App: See something wrong? Click on it
     App-->>You: Write your feedback
     You->>App: "This button should be blue"
-    App->>AI: Feedback + what you pointed at<br/>(element, styles, position — full context)
+    App->>AI: Feedback + what you pointed at (element, styles, position)
     Note over AI: Finds the file, fixes the code
-    AI->>App: ✅ Done
-    App-->>You: Review disappears — it's fixed
+    AI->>App: Done
+    App-->>You: Review disappears - it's fixed
 ```
 
 One Python process handles everything - MCP protocol for the agent (stdio) and REST API for the browser UI (HTTP). Reviews are stored in a SQLite database inside your project.
@@ -157,10 +157,10 @@ Every review can be tagged with a category:
 
 ```mermaid
 graph LR
-    Agent["🤖 AI Agent<br/>(Claude, Codex, Cursor)"]
-    Browser["👤 Reviewer<br/>(Browser)"]
-    Server["ui-ticket-mcp<br/><i>Single Python process</i><br/>MCP stdio · 10 tools<br/>REST API · :3200"]
-    DB[("SQLite<br/>.reviews/reviews.db")]
+    Agent["AI Agent\n(Claude, Codex, Cursor)"]
+    Browser["Reviewer\n(Browser)"]
+    Server["ui-ticket-mcp\nSingle Python process\nMCP stdio + REST API :3200"]
+    DB[("SQLite\n.reviews/reviews.db")]
 
     Agent <-->|stdio MCP| Server
     Browser <-->|HTTP REST| Server
