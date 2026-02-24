@@ -481,7 +481,7 @@ Found a bug or have a feature request? [Open an issue](https://github.com/0ics-s
 
 ## License
 
-MIT
+CC BY-NC 4.0 — free for study, research, and non-commercial use. See [LICENSE](LICENSE) for details.
 
 ---
 
