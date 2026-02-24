@@ -1,0 +1,1568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ui-ticket-mcp - Human reviews. AI resolves.</title>
+  <meta name="description" content="Click on any element in your browser, write a review, and let AI coding agents fix the code automatically via MCP." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg-deep: #06080d;
+      --bg-base: #0b0f18;
+      --bg-surface: #111827;
+      --bg-card: #161d2e;
+      --bg-elevated: #1c2540;
+      --accent: #f59e0b;
+      --accent-bright: #fbbf24;
+      --accent-glow: rgba(245, 158, 11, 0.15);
+      --cyan: #22d3ee;
+      --cyan-dim: #0e7490;
+      --green: #34d399;
+      --red: #f87171;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --border: #1e293b;
+      --border-light: #334155;
+      --font-display: 'Instrument Serif', Georgia, serif;
+      --font-body: 'DM Sans', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border-light) var(--bg-deep);
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-deep);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ====== AMBIENT BACKGROUND ====== */
+    .ambient {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .ambient .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.35;
+    }
+    .ambient .orb-1 {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+      top: -200px; left: -100px;
+      animation: float-1 20s ease-in-out infinite;
+    }
+    .ambient .orb-2 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, var(--cyan) 0%, transparent 70%);
+      top: 40%; right: -150px;
+      animation: float-2 25s ease-in-out infinite;
+      opacity: 0.2;
+    }
+    .ambient .orb-3 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
+      bottom: -100px; left: 30%;
+      animation: float-3 22s ease-in-out infinite;
+      opacity: 0.15;
+    }
+
+    @keyframes float-1 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(80px, 60px) scale(1.1); }
+      66% { transform: translate(-40px, 30px) scale(0.95); }
+    }
+    @keyframes float-2 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(-60px, -80px) scale(1.15); }
+    }
+    @keyframes float-3 {
+      0%, 100% { transform: translate(0, 0); }
+      40% { transform: translate(50px, -50px); }
+      80% { transform: translate(-30px, -20px); }
+    }
+
+    /* Grid overlay */
+    .grid-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 80px 80px;
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 20%, transparent 70%);
+    }
+
+    /* ====== CONTENT WRAPPER ====== */
+    .content-layer {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ====== NAV ====== */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 0 clamp(24px, 5vw, 80px);
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(6, 8, 13, 0.7);
+      backdrop-filter: blur(20px) saturate(1.2);
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      transition: background 0.3s;
+    }
+    nav.scrolled { background: rgba(6, 8, 13, 0.92); }
+    .nav-brand {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--accent);
+      letter-spacing: -0.02em;
+    }
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 14px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+      font-weight: 450;
+    }
+    .nav-links a:hover { color: var(--text-primary); }
+    .nav-cta {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      padding: 8px 20px;
+      background: var(--accent);
+      color: var(--bg-deep);
+      border: none;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .nav-cta:hover {
+      background: var(--accent-bright);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(245, 158, 11, 0.25);
+    }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+    }
+
+    /* ====== SECTIONS ====== */
+    section {
+      padding: 0 clamp(24px, 5vw, 80px);
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* ====== HERO ====== */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding-top: 64px;
+      position: relative;
+      overflow: hidden;
+    }
+    #particles {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .hero-inner {
+      max-width: 900px;
+      position: relative;
+      z-index: 1;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      background: var(--accent-glow);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      border-radius: 100px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--accent);
+      margin-bottom: 32px;
+      letter-spacing: 0.02em;
+    }
+    .hero-badge .dot {
+      width: 6px; height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    .hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(48px, 7vw, 88px);
+      line-height: 1.05;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      margin-bottom: 28px;
+    }
+    .hero h1 em {
+      font-style: italic;
+      background: linear-gradient(135deg, var(--accent) 0%, #fb923c 50%, var(--cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      font-size: clamp(17px, 2vw, 20px);
+      color: var(--text-secondary);
+      max-width: 640px;
+      margin: 0 auto 44px;
+      line-height: 1.65;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 14px 32px;
+      background: var(--accent);
+      color: var(--bg-deep);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.25s;
+    }
+    .btn-primary:hover {
+      background: var(--accent-bright);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(245, 158, 11, 0.3);
+    }
+    .btn-secondary {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 500;
+      padding: 14px 32px;
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.25s;
+    }
+    .btn-secondary:hover {
+      border-color: var(--text-muted);
+      color: var(--text-primary);
+      transform: translateY(-2px);
+    }
+
+    /* ====== HERO TERMINAL ====== */
+    .hero-terminal {
+      margin-top: 64px;
+      text-align: left;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.03),
+        0 20px 60px rgba(0,0,0,0.5),
+        0 0 80px rgba(245, 158, 11, 0.05);
+    }
+    .terminal-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 18px;
+      background: rgba(255,255,255,0.02);
+      border-bottom: 1px solid var(--border);
+    }
+    .terminal-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+    }
+    .terminal-dot:nth-child(1) { background: #ef4444; }
+    .terminal-dot:nth-child(2) { background: #f59e0b; }
+    .terminal-dot:nth-child(3) { background: #22c55e; }
+    .terminal-title {
+      flex: 1;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .terminal-body {
+      padding: 24px;
+      font-family: var(--font-mono);
+      font-size: 13.5px;
+      line-height: 1.7;
+      overflow-x: auto;
+    }
+    .terminal-body .line {
+      opacity: 0;
+      animation: type-in 0.3s ease forwards;
+    }
+    .terminal-body .prompt { color: var(--green); }
+    .terminal-body .cmd { color: var(--text-primary); }
+    .terminal-body .comment { color: var(--text-muted); font-style: italic; }
+    .terminal-body .output { color: var(--text-secondary); }
+    .terminal-body .accent { color: var(--accent); }
+    .terminal-body .cyan { color: var(--cyan); }
+
+    @keyframes type-in {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ====== SECTION HEADERS ====== */
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 16px;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(32px, 4.5vw, 52px);
+      font-weight: 400;
+      line-height: 1.15;
+      margin-bottom: 20px;
+      letter-spacing: -0.02em;
+    }
+    .section-desc {
+      font-size: 17px;
+      color: var(--text-secondary);
+      max-width: 560px;
+      line-height: 1.65;
+    }
+
+    /* ====== HOW IT WORKS ====== */
+    .how-section {
+      padding-top: 140px;
+      padding-bottom: 100px;
+    }
+    .how-header {
+      text-align: center;
+      margin-bottom: 80px;
+    }
+    .how-header .section-desc {
+      margin: 0 auto;
+    }
+    .how-steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      position: relative;
+    }
+    @media (max-width: 768px) {
+      .how-steps { grid-template-columns: 1fr; gap: 32px; }
+    }
+    .step {
+      position: relative;
+      padding: 36px 32px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      transition: all 0.35s;
+    }
+    .step:hover {
+      border-color: rgba(245, 158, 11, 0.2);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.3), 0 0 60px var(--accent-glow);
+    }
+    .step-number {
+      font-family: var(--font-display);
+      font-size: 56px;
+      color: rgba(245, 158, 11, 0.12);
+      font-style: italic;
+      line-height: 1;
+      margin-bottom: 16px;
+    }
+    .step-icon {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--accent-glow);
+      border-radius: 12px;
+      margin-bottom: 20px;
+      font-size: 22px;
+    }
+    .step h3 {
+      font-family: var(--font-body);
+      font-size: 19px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .step p {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .step-connector {
+      display: none;
+    }
+    @media (min-width: 769px) {
+      .step-connector {
+        display: block;
+        position: absolute;
+        top: 50%;
+        right: -13px;
+        transform: translateY(-50%);
+        color: var(--accent);
+        font-size: 18px;
+        z-index: 2;
+        opacity: 0.5;
+      }
+    }
+
+    /* ====== FEATURES ====== */
+    .features-section {
+      padding-top: 80px;
+      padding-bottom: 120px;
+    }
+    .features-header {
+      margin-bottom: 64px;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    @media (max-width: 900px) {
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .features-grid { grid-template-columns: 1fr; }
+    }
+    .feature-card {
+      padding: 32px 28px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .feature-card:hover::before { opacity: 1; }
+    .feature-card:hover {
+      border-color: rgba(245, 158, 11, 0.15);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+    }
+    .feature-icon {
+      font-size: 28px;
+      margin-bottom: 16px;
+      display: block;
+    }
+    .feature-card h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .feature-card p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    /* ====== ANNOTATION METADATA ====== */
+    .metadata-section {
+      padding-top: 40px;
+      padding-bottom: 120px;
+    }
+    .metadata-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: center;
+    }
+    @media (max-width: 900px) {
+      .metadata-layout { grid-template-columns: 1fr; }
+    }
+    .metadata-visual {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+    .metadata-visual .key { color: var(--cyan); }
+    .metadata-visual .val { color: var(--text-secondary); }
+    .metadata-visual .str { color: var(--accent); }
+    .metadata-visual .brace { color: var(--text-muted); }
+
+    /* ====== QUICKSTART ====== */
+    .quickstart-section {
+      padding-top: 40px;
+      padding-bottom: 120px;
+    }
+    .quickstart-header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+    .quickstart-header .section-desc { margin: 0 auto; }
+    .quickstart-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 768px) {
+      .quickstart-grid { grid-template-columns: 1fr; }
+    }
+    .code-block {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .code-block-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.015);
+    }
+    .code-block-lang {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .code-block-copy {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 4px 12px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .code-block-copy:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .code-block pre {
+      padding: 20px 24px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.7;
+      overflow-x: auto;
+      color: var(--text-secondary);
+    }
+    .code-block pre .kw { color: #c084fc; }
+    .code-block pre .str { color: var(--accent); }
+    .code-block pre .fn { color: var(--cyan); }
+    .code-block pre .cm { color: var(--text-muted); }
+    .code-block pre .tag { color: var(--red); }
+    .code-block pre .attr { color: var(--cyan); }
+    .code-block pre .val { color: var(--accent); }
+
+    /* ====== TIPS ====== */
+    .tips-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 40px;
+    }
+    @media (max-width: 768px) {
+      .tips-row { grid-template-columns: 1fr; }
+    }
+    .tip-card {
+      padding: 28px 28px;
+      background: rgba(17, 24, 39, 0.5);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      border-left: 3px solid var(--accent);
+      transition: all 0.3s;
+    }
+    .tip-card:first-child { border-left-color: var(--cyan); }
+    .tip-card:hover {
+      background: rgba(17, 24, 39, 0.8);
+      transform: translateY(-2px);
+    }
+    .tip-icon { margin-bottom: 14px; }
+    .tip-card h4 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .tip-card p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .tip-card code {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      background: var(--bg-card);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--text-primary);
+    }
+    .tip-card em {
+      color: var(--text-primary);
+      font-style: italic;
+    }
+
+    /* ====== FRAMEWORKS ====== */
+    .frameworks-section {
+      padding-top: 40px;
+      padding-bottom: 120px;
+    }
+    .frameworks-header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+    .frameworks-header .section-desc { margin: 0 auto; }
+    .framework-logos {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+    .fw-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 28px 36px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      transition: all 0.3s;
+      min-width: 120px;
+    }
+    .fw-item:hover {
+      border-color: rgba(245, 158, 11, 0.2);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    }
+    .fw-item svg { width: 36px; height: 36px; }
+    .fw-item span {
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    /* ====== MCP TOOLS ====== */
+    .tools-section {
+      padding-top: 40px;
+      padding-bottom: 120px;
+    }
+    .tools-header {
+      margin-bottom: 48px;
+    }
+    .tools-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 768px) {
+      .tools-list { grid-template-columns: 1fr; }
+    }
+    .tool-item {
+      display: flex;
+      gap: 16px;
+      padding: 20px 24px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      transition: all 0.25s;
+    }
+    .tool-item:hover {
+      border-color: rgba(34, 211, 238, 0.2);
+      background: rgba(17, 24, 39, 0.8);
+    }
+    .tool-name {
+      font-family: var(--font-mono);
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--cyan);
+      white-space: nowrap;
+    }
+    .tool-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* ====== ARCHITECTURE ====== */
+    .arch-section {
+      padding-top: 40px;
+      padding-bottom: 120px;
+    }
+    .arch-header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+    .arch-header .section-desc { margin: 0 auto; }
+    .arch-diagram {
+      max-width: 800px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 32px;
+      align-items: center;
+    }
+    @media (max-width: 768px) {
+      .arch-diagram { grid-template-columns: 1fr; gap: 24px; }
+      .arch-connector { display: none !important; }
+    }
+    .arch-box {
+      padding: 32px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      text-align: center;
+    }
+    .arch-box-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 12px;
+    }
+    .arch-box-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .arch-box-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .arch-center {
+      padding: 40px 36px;
+      background: linear-gradient(135deg, var(--bg-surface), var(--bg-card));
+      border: 1px solid var(--accent);
+      border-radius: 18px;
+      text-align: center;
+      box-shadow: 0 0 60px var(--accent-glow), 0 0 120px rgba(245, 158, 11, 0.05);
+    }
+    .arch-center .arch-box-title { color: var(--accent); }
+    .arch-connector {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+    .arch-connector .arrow {
+      color: var(--accent);
+      font-size: 20px;
+    }
+    .arch-storage {
+      text-align: center;
+      margin-top: 32px;
+    }
+    .arch-storage-box {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 28px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    /* ====== CTA ====== */
+    .cta-section {
+      padding-top: 40px;
+      padding-bottom: 160px;
+    }
+    .cta-card {
+      text-align: center;
+      padding: 80px 48px;
+      background: linear-gradient(135deg, var(--bg-surface), var(--bg-card));
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-card::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: 20%;
+      right: 20%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    }
+    .cta-card h2 {
+      font-family: var(--font-display);
+      font-size: clamp(32px, 4vw, 48px);
+      font-weight: 400;
+      margin-bottom: 16px;
+    }
+    .cta-card h2 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+    .cta-card p {
+      font-size: 17px;
+      color: var(--text-secondary);
+      margin-bottom: 36px;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .cta-actions {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .cta-install {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 24px;
+      background: var(--bg-deep);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .cta-install:hover {
+      border-color: var(--border-light);
+      color: var(--text-primary);
+    }
+    .cta-install .prefix { color: var(--green); }
+
+    /* ====== FOOTER ====== */
+    footer {
+      padding: 48px clamp(24px, 5vw, 80px);
+      border-top: 1px solid var(--border);
+    }
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .footer-brand {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+    .footer-links {
+      display: flex;
+      gap: 24px;
+    }
+    .footer-links a {
+      font-size: 14px;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--text-secondary); }
+    .footer-credits {
+      width: 100%;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 8px;
+      letter-spacing: 0.02em;
+    }
+    .footer-credits span { color: var(--text-secondary); }
+
+    /* ====== SCROLL ANIMATIONS ====== */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient background -->
+  <div class="ambient">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+  <div class="grid-bg"></div>
+
+  <div class="content-layer">
+
+    <!-- NAV -->
+    <nav id="nav">
+      <a href="#" class="nav-brand" style="text-decoration:none">ui-ticket-mcp</a>
+      <ul class="nav-links">
+        <li><a href="#how">How it works</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#quickstart">Quick Start</a></li>
+        <li><a href="#tools">MCP Tools</a></li>
+        <li><a href="https://github.com/0ics-srls/ui-ticket-mcp_public" target="_blank">GitHub</a></li>
+      </ul>
+      <a href="#quickstart" class="nav-cta">Get Started</a>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+      <canvas id="particles"></canvas>
+      <div class="hero-inner">
+        <div class="hero-badge reveal">
+          <span class="dot"></span>
+          v1.0.0 &mdash; now on PyPI &amp; npm
+        </div>
+        <h1 class="reveal reveal-delay-1">
+          You review.<br/><em>AI resolves.</em>
+        </h1>
+        <p class="hero-sub reveal reveal-delay-2">
+          Click on any element in your browser, write a comment like
+          "fix the spacing here", and let your AI coding agent pick it up
+          via MCP and fix the code automatically.
+        </p>
+        <div class="hero-actions reveal reveal-delay-3">
+          <a href="#quickstart" class="btn-primary">Get Started</a>
+          <a href="#features" class="btn-secondary">Explore Features</a>
+        </div>
+
+        <!-- Terminal preview -->
+        <div class="hero-terminal reveal reveal-delay-3" style="transition-delay: 0.45s">
+          <div class="terminal-bar">
+            <div class="terminal-dot"></div>
+            <div class="terminal-dot"></div>
+            <div class="terminal-dot"></div>
+            <span class="terminal-title">agent workflow</span>
+          </div>
+          <div class="terminal-body" id="terminal">
+            <div class="line" style="animation-delay:.3s"><span class="comment"># Agent reads pending reviews</span></div>
+            <div class="line" style="animation-delay:.6s"><span class="prompt">mcp</span> <span class="cmd">get_pending_work()</span></div>
+            <div class="line" style="animation-delay:.9s"><span class="output">## user-profile (2 open)</span></div>
+            <div class="line" style="animation-delay:1.1s"><span class="output">&nbsp; - <span class="accent">#4</span> <span class="cyan">[bug]</span> (alice): The header spacing is off</span></div>
+            <div class="line" style="animation-delay:1.3s"><span class="output">&nbsp; - <span class="accent">#7</span> <span class="cyan">[suggestion]</span> (bob): Add hover state to buttons</span></div>
+            <div class="line" style="animation-delay:1.7s">&nbsp;</div>
+            <div class="line" style="animation-delay:2.0s"><span class="comment"># Agent locates the source file</span></div>
+            <div class="line" style="animation-delay:2.3s"><span class="prompt">mcp</span> <span class="cmd">find_source_file_tool(<span class="str">"user-profile"</span>)</span></div>
+            <div class="line" style="animation-delay:2.6s"><span class="output">&nbsp; src/app/user-profile/user-profile.component.ts</span></div>
+            <div class="line" style="animation-delay:3.0s">&nbsp;</div>
+            <div class="line" style="animation-delay:3.3s"><span class="comment"># Agent fixes the code, then resolves</span></div>
+            <div class="line" style="animation-delay:3.6s"><span class="prompt">mcp</span> <span class="cmd">resolve_review(<span class="accent">4</span>)</span></div>
+            <div class="line" style="animation-delay:3.9s"><span class="output">&nbsp; <span class="accent">Resolved review #4 on user-profile.</span></span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="how-section" id="how">
+      <div class="container">
+        <div class="how-header reveal">
+          <div class="section-label">How it works</div>
+          <h2 class="section-title">Three steps. Zero friction.</h2>
+          <p class="section-desc">One Python process runs both the MCP server for your AI agent and the REST API for the browser UI.</p>
+        </div>
+        <div class="how-steps">
+          <div class="step reveal">
+            <div class="step-number">01</div>
+            <div class="step-icon">
+              <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4m0 14v4M4.22 4.22l2.83 2.83m9.9 9.9l2.83 2.83M1 12h4m14 0h4M4.22 19.78l2.83-2.83m9.9-9.9l2.83-2.83"/></svg>
+            </div>
+            <h3>Click &amp; Comment</h3>
+            <p>Open your app, press Alt+A, click any element. Write your feedback in the popup. The system captures the element's selector, styles, position, and accessibility info.</p>
+            <div class="step-connector">&rarr;</div>
+          </div>
+          <div class="step reveal reveal-delay-1">
+            <div class="step-number">02</div>
+            <div class="step-icon">
+              <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20V10m0 0l-3 3m3-3 3 3"/><rect x="3" y="4" width="18" height="4" rx="1"/></svg>
+            </div>
+            <h3>AI Reads via MCP</h3>
+            <p>Your coding agent (Claude Code, Cursor, Codex) calls <code style="font-family:var(--font-mono);font-size:12px;background:var(--bg-card);padding:2px 6px;border-radius:4px">get_pending_work()</code> and sees every review with full element context.</p>
+            <div class="step-connector">&rarr;</div>
+          </div>
+          <div class="step reveal reveal-delay-2">
+            <div class="step-number">03</div>
+            <div class="step-icon">
+              <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <h3>Code Fixed, Review Resolved</h3>
+            <p>Agent edits the code, calls <code style="font-family:var(--font-mono);font-size:12px;background:var(--bg-card);padding:2px 6px;border-radius:4px">resolve_review()</code>, and the badge turns green. You see the fix in real time.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="features-section" id="features">
+      <div class="container">
+        <div class="features-header reveal">
+          <div class="section-label">Features</div>
+          <h2 class="section-title">Everything you need.<br/>Nothing you don't.</h2>
+        </div>
+        <div class="features-grid">
+          <div class="feature-card reveal">
+            <span class="feature-icon">
+              <svg width="28" height="28" fill="none" stroke="var(--accent)" stroke-width="1.8"><circle cx="14" cy="14" r="5"/><path d="M14 3v4m0 14v4M4.93 4.93l2.83 2.83m12.48 12.48l2.83 2.83M3 14h4m14 0h4M4.93 23.07l2.83-2.83M19.24 8.76l2.83-2.83"/></svg>
+            </span>
+            <h3>Click-to-Annotate</h3>
+            <p>Press Alt+A and click any element. Smart popup captures rich metadata: CSS selector, computed styles, DOM path, accessibility info, nearby text.</p>
+          </div>
+          <div class="feature-card reveal reveal-delay-1">
+            <span class="feature-icon">
+              <svg width="28" height="28" fill="none" stroke="var(--cyan)" stroke-width="1.8"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="17" y="3" width="8" height="8" rx="2"/><rect x="3" y="17" width="8" height="8" rx="2"/><rect x="17" y="17" width="8" height="8" rx="2"/></svg>
+            </span>
+            <h3>Any Framework</h3>
+            <p>Standard Web Component. Works in Angular, React, Vue, Svelte, or plain HTML. Use <code style="font-family:var(--font-mono);font-size:11px;background:var(--bg-card);padding:2px 5px;border-radius:3px">npm install ui-ticket-panel</code> with a bundler, or load directly from CDN with a single script tag.</p>
+          </div>
+          <div class="feature-card reveal reveal-delay-2">
+            <span class="feature-icon">
+              <svg width="28" height="28" fill="none" stroke="var(--green)" stroke-width="1.8"><path d="M4 14l5 5L24 5"/></svg>
+            </span>
+            <h3>10 MCP Tools</h3>
+            <p>Everything your AI agent needs: review summaries, pending work, annotated reviews with element metadata, file finder, batch resolve, and more.</p>
+          </div>
+          <div class="feature-card reveal">
+            <span class="feature-icon">
+              <svg width="28" height="28" fill="none" stroke="var(--red)" stroke-width="1.8"><path d="M7 7h14v14H7z"/><path d="M7 12h14M14 7v14"/></svg>
+            </span>
+            <h3>Tags &amp; Threads</h3>
+            <p>Categorize with tags: bug, suggestion, question, general. Reply to reviews for threaded discussions. Filter and search across all comments.</p>
+          </div>
+          <div class="feature-card reveal reveal-delay-1">
+            <span class="feature-icon">
+              <svg width="28" height="28" fill="none" stroke="#a78bfa" stroke-width="1.8"><ellipse cx="14" cy="14" rx="11" ry="4"/><ellipse cx="14" cy="14" rx="11" ry="4" transform="rotate(60 14 14)"/><ellipse cx="14" cy="14" rx="11" ry="4" transform="rotate(120 14 14)"/></svg>
+            </span>
+            <h3>Smart Badges</h3>
+            <p>Numbered markers appear on annotated elements. Red for open, green for resolved. Stacked reviews show a gradient pill with open/resolved ratio.</p>
+          </div>
+          <div class="feature-card reveal reveal-delay-2">
+            <span class="feature-icon">
+              <svg width="28" height="28" fill="none" stroke="var(--accent-bright)" stroke-width="1.8"><path d="M14 3v8l5 3"/><circle cx="14" cy="14" r="11"/></svg>
+            </span>
+            <h3>SQLite &amp; Git-Friendly</h3>
+            <p>Reviews stored in <code style="font-family:var(--font-mono);font-size:11px;background:var(--bg-card);padding:2px 5px;border-radius:3px">.reviews/reviews.db</code> inside your project. WAL mode for concurrency. Commit to git to share with your team.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ANNOTATION METADATA -->
+    <section class="metadata-section">
+      <div class="container">
+        <div class="metadata-layout">
+          <div class="reveal">
+            <div class="section-label">Annotation Context</div>
+            <h2 class="section-title">Your AI agent sees <em style="font-family:var(--font-display);color:var(--accent)">everything</em></h2>
+            <p class="section-desc" style="margin-bottom:24px">
+              When you annotate an element, the system captures comprehensive metadata. Your AI agent gets the full picture&mdash;not just "fix this button", but exactly which button, where it is, what it looks like, and how to find it.
+            </p>
+            <p class="section-desc" style="font-size:14px;color:var(--text-muted)">
+              CSS selector &middot; Bounding box &middot; Computed styles &middot; Full DOM path &middot; ARIA roles &middot; Nearby text &middot; Sibling context &middot; Selected text &middot; Page URL
+            </p>
+          </div>
+          <div class="metadata-visual reveal reveal-delay-1">
+            <span class="brace">{</span><br/>
+            &nbsp;&nbsp;<span class="key">"element"</span>: <span class="str">"Button 'Save'"</span>,<br/>
+            &nbsp;&nbsp;<span class="key">"selector"</span>: <span class="str">"form.editor > button.primary"</span>,<br/>
+            &nbsp;&nbsp;<span class="key">"boundingBox"</span>: <span class="brace">{</span> <span class="val">x: 420, y: 680, w: 96, h: 40</span> <span class="brace">}</span>,<br/>
+            &nbsp;&nbsp;<span class="key">"computedStyles"</span>: <span class="str">"background: #3b82f6; ..."</span>,<br/>
+            &nbsp;&nbsp;<span class="key">"fullPath"</span>: <span class="str">"body > div#app > form > button"</span>,<br/>
+            &nbsp;&nbsp;<span class="key">"accessibility"</span>: <span class="str">"role=button, tabindex=0"</span>,<br/>
+            &nbsp;&nbsp;<span class="key">"nearbyText"</span>: <span class="str">"Save | [after:] Cancel"</span>,<br/>
+            &nbsp;&nbsp;<span class="key">"url"</span>: <span class="str">"http://localhost:4200/editor"</span><br/>
+            <span class="brace">}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUICKSTART -->
+    <section class="quickstart-section" id="quickstart">
+      <div class="container">
+        <div class="quickstart-header reveal">
+          <div class="section-label">Quick Start</div>
+          <h2 class="section-title">Up and running in 2 minutes</h2>
+          <p class="section-desc">Add the MCP config for your agent, drop the Web Component into your app.</p>
+        </div>
+        <div class="quickstart-grid">
+          <div class="code-block reveal">
+            <div class="code-block-header">
+              <span class="code-block-lang">Step 1 &mdash; .mcp.json</span>
+              <button class="code-block-copy" onclick="copyCode(this)">Copy</button>
+            </div>
+<pre><span class="brace">{</span>
+  <span class="key">"mcpServers"</span>: <span class="brace">{</span>
+    <span class="key">"ui-ticket-mcp"</span>: <span class="brace">{</span>
+      <span class="key">"command"</span>: <span class="str">"uvx"</span>,
+      <span class="key">"args"</span>: [<span class="str">"ui-ticket-mcp"</span>],
+      <span class="key">"env"</span>: <span class="brace">{</span>
+        <span class="key">"PROJECT_ROOT"</span>: <span class="str">"/path/to/project"</span>,
+        <span class="key">"REVIEW_PORT"</span>: <span class="str">"3200"</span>
+      <span class="brace">}</span>
+    <span class="brace">}</span>
+  <span class="brace">}</span>
+<span class="brace">}</span></pre>
+          </div>
+          <div class="code-block reveal reveal-delay-1">
+            <div class="code-block-header">
+              <span class="code-block-lang">Step 2 &mdash; Your app</span>
+              <button class="code-block-copy" onclick="copyCode(this)">Copy</button>
+            </div>
+<pre><span class="cm">// Install</span>
+<span class="kw">npm install</span> <span class="str">ui-ticket-panel</span>
+
+<span class="cm">// Use anywhere</span>
+<span class="kw">import</span> { <span class="fn">defineReviewPanel</span> } <span class="kw">from</span> <span class="str">'ui-ticket-panel'</span>;
+<span class="fn">defineReviewPanel</span>();
+
+<span class="cm">// HTML (any framework)</span>
+&lt;<span class="tag">review-panel</span>
+  <span class="attr">api-url</span>=<span class="val">"http://localhost:3200/api"</span>
+&gt;&lt;/<span class="tag">review-panel</span>&gt;</pre>
+          </div>
+          <div class="code-block reveal reveal-delay-1">
+            <div class="code-block-header">
+              <span class="code-block-lang">No bundler? Use CDN</span>
+              <button class="code-block-copy" onclick="copyCode(this)">Copy</button>
+            </div>
+<pre><span class="cm">&lt;!-- Just two lines. No npm, no bundler. --&gt;</span>
+&lt;<span class="tag">script</span> <span class="attr">type</span>=<span class="val">"module"</span>
+  <span class="attr">src</span>=<span class="val">"https://unpkg.com/ui-ticket-panel/dist/bundle.js"</span>
+&gt;&lt;/<span class="tag">script</span>&gt;
+
+&lt;<span class="tag">review-panel</span>
+  <span class="attr">api-url</span>=<span class="val">"http://localhost:3200/api"</span>
+&gt;&lt;/<span class="tag">review-panel</span>&gt;</pre>
+          </div>
+        </div>
+
+        <!-- Tips -->
+        <div class="tips-row">
+          <div class="tip-card reveal">
+            <div class="tip-icon">
+              <svg width="22" height="22" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round"><path d="M12 2a7 7 0 014 12.73V17a2 2 0 01-2 2h-4a2 2 0 01-2-2v-2.27A7 7 0 0112 2z"/><path d="M10 21h4"/></svg>
+            </div>
+            <h4>Let your AI agent set it up</h4>
+            <p>Don't want to configure manually? Just tell your agent: <em>"Read the setup guide and add the review panel to my app."</em> The agent calls <code>get_setup_guide()</code> and knows exactly what to do.</p>
+          </div>
+          <div class="tip-card reveal reveal-delay-1">
+            <div class="tip-icon">
+              <svg width="22" height="22" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>
+            </div>
+            <h4>Add it once, in the root</h4>
+            <p>Place <code>&lt;review-panel&gt;</code> in your app's main entry file (e.g. <code>App.vue</code>, <code>App.tsx</code>, <code>index.html</code>). One instance covers your entire app &mdash; no need to add it per page or component.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FRAMEWORKS -->
+    <section class="frameworks-section">
+      <div class="container">
+        <div class="frameworks-header reveal">
+          <div class="section-label">Compatibility</div>
+          <h2 class="section-title">Works everywhere</h2>
+          <p class="section-desc">Standard Web Component. No wrappers, no adapters, no framework-specific builds.</p>
+        </div>
+        <div class="framework-logos reveal">
+          <div class="fw-item">
+            <svg viewBox="0 0 24 24" fill="var(--red)"><path d="M12 2L1 21h22L12 2zm0 4.5L19.5 19h-15L12 6.5z"/></svg>
+            <span>Angular</span>
+          </div>
+          <div class="fw-item">
+            <svg viewBox="0 0 24 24" fill="var(--cyan)"><circle cx="12" cy="12" r="2.5"/><ellipse cx="12" cy="12" rx="11" ry="4.2" fill="none" stroke="var(--cyan)" stroke-width="1"/><ellipse cx="12" cy="12" rx="11" ry="4.2" fill="none" stroke="var(--cyan)" stroke-width="1" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="11" ry="4.2" fill="none" stroke="var(--cyan)" stroke-width="1" transform="rotate(120 12 12)"/></svg>
+            <span>React</span>
+          </div>
+          <div class="fw-item">
+            <svg viewBox="0 0 24 24" fill="var(--green)"><path d="M12 2l10 17.32H2L12 2z" opacity=".6"/><path d="M12 7l6 10.39H6L12 7z"/></svg>
+            <span>Vue</span>
+          </div>
+          <div class="fw-item">
+            <svg viewBox="0 0 24 24" fill="var(--accent)"><path d="M5.37 2.68L12 16.82 18.63 2.68h-3.48L12 9.88 8.85 2.68z"/></svg>
+            <span>Svelte</span>
+          </div>
+          <div class="fw-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+            <span>Plain HTML</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MCP TOOLS -->
+    <section class="tools-section" id="tools">
+      <div class="container">
+        <div class="tools-header reveal">
+          <div class="section-label">MCP Protocol</div>
+          <h2 class="section-title">10 tools for your AI agent</h2>
+          <p class="section-desc">Everything an agent needs to understand, locate, fix, and resolve UI review feedback.</p>
+        </div>
+        <div class="tools-list">
+          <div class="tool-item reveal">
+            <div>
+              <div class="tool-name">get_pending_work()</div>
+              <div class="tool-desc">All open reviews grouped by page &mdash; the agent's todo list</div>
+            </div>
+          </div>
+          <div class="tool-item reveal reveal-delay-1">
+            <div>
+              <div class="tool-name">get_annotated_reviews()</div>
+              <div class="tool-desc">Reviews with full element metadata: selector, styles, DOM path</div>
+            </div>
+          </div>
+          <div class="tool-item reveal">
+            <div>
+              <div class="tool-name">find_source_file_tool()</div>
+              <div class="tool-desc">Locate source files by page ID (kebab-case, CamelCase, glob)</div>
+            </div>
+          </div>
+          <div class="tool-item reveal reveal-delay-1">
+            <div>
+              <div class="tool-name">resolve_review()</div>
+              <div class="tool-desc">Mark a review as resolved with timestamp and resolver name</div>
+            </div>
+          </div>
+          <div class="tool-item reveal">
+            <div>
+              <div class="tool-name">batch_resolve()</div>
+              <div class="tool-desc">Resolve all open reviews on a page at once</div>
+            </div>
+          </div>
+          <div class="tool-item reveal reveal-delay-1">
+            <div>
+              <div class="tool-name">get_review_summary()</div>
+              <div class="tool-desc">Per-page overview with open / resolved / total counts</div>
+            </div>
+          </div>
+          <div class="tool-item reveal">
+            <div>
+              <div class="tool-name">get_reviews()</div>
+              <div class="tool-desc">List all reviews with status, tags, element context, replies</div>
+            </div>
+          </div>
+          <div class="tool-item reveal reveal-delay-1">
+            <div>
+              <div class="tool-name">add_review()</div>
+              <div class="tool-desc">Create review with tag, metadata, and threading support</div>
+            </div>
+          </div>
+          <div class="tool-item reveal">
+            <div>
+              <div class="tool-name">reopen_review()</div>
+              <div class="tool-desc">Reopen a previously resolved review</div>
+            </div>
+          </div>
+          <div class="tool-item reveal reveal-delay-1">
+            <div>
+              <div class="tool-name">get_setup_guide()</div>
+              <div class="tool-desc">Full setup instructions &mdash; useful when agent configures new projects</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ARCHITECTURE -->
+    <section class="arch-section">
+      <div class="container">
+        <div class="arch-header reveal">
+          <div class="section-label">Architecture</div>
+          <h2 class="section-title">One process. Two protocols.</h2>
+          <p class="section-desc">A single Python process serves both MCP (stdio) for AI agents and REST (HTTP) for the browser UI.</p>
+        </div>
+        <div class="arch-diagram reveal">
+          <div class="arch-box">
+            <div class="arch-box-label">Your IDE</div>
+            <div class="arch-box-title">AI Agent</div>
+            <div class="arch-box-desc">Claude Code, Cursor, Codex<br/><span style="color:var(--cyan);font-family:var(--font-mono);font-size:12px">stdio (MCP)</span></div>
+          </div>
+          <div class="arch-connector">
+            <span class="arrow">&larr;</span>
+            <span class="arrow">&rarr;</span>
+          </div>
+          <div class="arch-center">
+            <div class="arch-box-label" style="color:var(--accent)">Single process</div>
+            <div class="arch-box-title">ui-ticket-mcp</div>
+            <div class="arch-box-desc">
+              MCP Server (10 tools)<br/>
+              REST API (:3200)<br/>
+              <span style="font-family:var(--font-mono);font-size:12px;color:var(--text-muted)">FastAPI + MCP SDK</span>
+            </div>
+          </div>
+        </div>
+        <div style="max-width:800px;margin:24px auto 0;display:flex;justify-content:center;gap:24px;flex-wrap:wrap">
+          <div class="arch-box reveal" style="flex:1;min-width:200px">
+            <div class="arch-box-label">Your Browser</div>
+            <div class="arch-box-title">Reviewer</div>
+            <div class="arch-box-desc">&lt;review-panel&gt;<br/><span style="color:var(--green);font-family:var(--font-mono);font-size:12px">HTTP REST</span></div>
+          </div>
+          <div class="arch-storage-box reveal reveal-delay-1">
+            <svg width="20" height="20" fill="none" stroke="var(--accent)" stroke-width="1.5"><ellipse cx="10" cy="5" rx="8" ry="3"/><path d="M2 5v10c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/><path d="M2 10c0 1.66 3.58 3 8 3s8-1.34 8-3"/></svg>
+            .reviews/reviews.db &mdash; SQLite (WAL)
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+      <div class="container">
+        <div class="cta-card reveal">
+          <h2>Start reviewing <em>today</em></h2>
+          <p>Install the MCP server and drop the Web Component into your app. Your AI agent will handle the rest.</p>
+          <div class="cta-actions">
+            <a href="#quickstart" class="btn-primary">Get Started</a>
+            <div class="cta-install" onclick="navigator.clipboard.writeText('pip install ui-ticket-mcp')">
+              <span class="prefix">$</span> pip install ui-ticket-mcp
+              <span style="opacity:.4;font-size:11px">click to copy</span>
+            </div>
+            <div class="cta-install" onclick="navigator.clipboard.writeText('npm install ui-ticket-panel')">
+              <span class="prefix">$</span> npm install ui-ticket-panel
+              <span style="opacity:.4;font-size:11px">click to copy</span>
+            </div>
+            <div class="cta-install" onclick="navigator.clipboard.writeText('&lt;script type=&quot;module&quot; src=&quot;https://unpkg.com/ui-ticket-panel/dist/bundle.js&quot;&gt;&lt;/script&gt;')" style="font-size:12px">
+              <span class="prefix">&lt;&gt;</span> CDN &mdash; no bundler needed
+              <span style="opacity:.4;font-size:11px">click to copy</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="footer-inner">
+        <span class="footer-brand">ui-ticket-mcp &middot; CC BY-NC 4.0</span>
+        <div class="footer-links">
+          <a href="https://github.com/0ics-srls/ui-ticket-mcp_public" target="_blank">GitHub</a>
+          <a href="https://pypi.org/project/ui-ticket-mcp/" target="_blank">PyPI</a>
+          <a href="https://www.npmjs.com/package/ui-ticket-panel" target="_blank">npm</a>
+          <a href="#quickstart">Get Started</a>
+        </div>
+        <div class="footer-credits">Built by <span>&Scaron;imon Cmar</span>, <span>Ladislav Sopko</span> &amp; <span>Lorenzo Leoni</span></div>
+      </div>
+    </footer>
+
+  </div><!-- /content-layer -->
+
+  <script>
+    // Scroll reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // Nav scroll effect
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 20);
+    }, { passive: true });
+
+    // Copy code
+    function copyCode(btn) {
+      const pre = btn.closest('.code-block').querySelector('pre');
+      navigator.clipboard.writeText(pre.textContent).then(() => {
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy', 2000);
+      });
+    }
+
+    // Particle network
+    (() => {
+      const canvas = document.getElementById('particles');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+      let w, h, particles, mouse = { x: -9999, y: -9999 };
+      const CONNECT_DIST = 140;
+      const MOUSE_DIST = 200;
+      const COUNT_FACTOR = 12000; // lower = more particles
+
+      function resize() {
+        const hero = canvas.parentElement;
+        w = hero.offsetWidth;
+        h = hero.offsetHeight;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        canvas.style.width = w + 'px';
+        canvas.style.height = h + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        init();
+      }
+
+      function init() {
+        const count = Math.floor((w * h) / COUNT_FACTOR);
+        particles = [];
+        for (let i = 0; i < count; i++) {
+          particles.push({
+            x: Math.random() * w,
+            y: Math.random() * h,
+            vx: (Math.random() - 0.5) * 0.4,
+            vy: (Math.random() - 0.5) * 0.4,
+            r: Math.random() * 1.5 + 0.5,
+            o: Math.random() * 0.5 + 0.2,
+          });
+        }
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, w, h);
+
+        // Update & draw particles
+        for (const p of particles) {
+          p.x += p.vx;
+          p.y += p.vy;
+          if (p.x < 0) p.x = w;
+          if (p.x > w) p.x = 0;
+          if (p.y < 0) p.y = h;
+          if (p.y > h) p.y = 0;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(245, 158, 11, ${p.o})`;
+          ctx.fill();
+        }
+
+        // Draw connections
+        for (let i = 0; i < particles.length; i++) {
+          const a = particles[i];
+
+          // Mouse interaction - glow near cursor
+          const dm = Math.hypot(a.x - mouse.x, a.y - mouse.y);
+          if (dm < MOUSE_DIST) {
+            const alpha = (1 - dm / MOUSE_DIST) * 0.6;
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(mouse.x, mouse.y);
+            ctx.strokeStyle = `rgba(34, 211, 238, ${alpha})`;
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+          }
+
+          // Particle-to-particle
+          for (let j = i + 1; j < particles.length; j++) {
+            const b = particles[j];
+            const d = Math.hypot(a.x - b.x, a.y - b.y);
+            if (d < CONNECT_DIST) {
+              const alpha = (1 - d / CONNECT_DIST) * 0.15;
+              ctx.beginPath();
+              ctx.moveTo(a.x, a.y);
+              ctx.lineTo(b.x, b.y);
+              ctx.strokeStyle = `rgba(245, 158, 11, ${alpha})`;
+              ctx.lineWidth = 0.6;
+              ctx.stroke();
+            }
+          }
+        }
+
+        requestAnimationFrame(draw);
+      }
+
+      // Mouse tracking on hero only
+      canvas.parentElement.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        mouse.x = e.clientX - rect.left;
+        mouse.y = e.clientY - rect.top;
+      }, { passive: true });
+      canvas.parentElement.addEventListener('mouseleave', () => {
+        mouse.x = -9999;
+        mouse.y = -9999;
+      });
+
+      // Make canvas interactive for mouse
+      canvas.style.pointerEvents = 'none';
+      canvas.parentElement.style.cursor = 'default';
+
+      window.addEventListener('resize', resize, { passive: true });
+      resize();
+      draw();
+    })();
+  </script>
+</body>
+</html>
