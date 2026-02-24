@@ -7,18 +7,17 @@ You click on elements, write review comments like "This button should be blue" o
 ## How it works
 
 ```mermaid
-sequenceDiagram
-    actor You
-    participant App as Your App
-    actor AI as AI Agent
-
-    You->>App: See something wrong? Click on it
-    App-->>You: Write your feedback
-    You->>App: "This button should be blue"
-    App->>AI: Feedback + what you pointed at (element, styles, position)
-    Note over AI: Finds the file, fixes the code
-    AI->>App: Done
-    App-->>You: Review disappears - it's fixed
+journey
+    title Using ui-ticket-mcp
+    section Review
+      Open your app in browser: 5: You
+      Click on a broken element: 4: You
+      Write what's wrong: 5: You
+    section AI resolves
+      Agent reads your feedback: 3: AI
+      Agent finds the source file: 4: AI
+      Agent fixes the code: 5: AI
+      Review disappears: 5: You, AI
 ```
 
 One Python process handles everything - MCP protocol for the agent (stdio) and REST API for the browser UI (HTTP). Reviews are stored in a SQLite database inside your project.
@@ -157,13 +156,13 @@ Every review can be tagged with a category:
 
 ```mermaid
 graph LR
-    Agent["AI Agent\n(Claude, Codex, Cursor)"]
-    Browser["Reviewer\n(Browser)"]
-    Server["ui-ticket-mcp\nSingle Python process\nMCP stdio + REST API :3200"]
-    DB[("SQLite\n.reviews/reviews.db")]
+    Agent[AI Agent]
+    Browser[Reviewer - Browser]
+    Server[ui-ticket-mcp]
+    DB[(SQLite)]
 
     Agent <-->|stdio MCP| Server
-    Browser <-->|HTTP REST| Server
+    Browser <-->|HTTP REST :3200| Server
     Server --- DB
 ```
 
