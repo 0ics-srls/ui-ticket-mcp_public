@@ -6,17 +6,19 @@ You click on elements, write review comments like "This button should be blue" o
 
 ## How it works
 
-```
- You (browser)                                    AI Agent (IDE)
- ─────────────                                    ──────────────
- 1. Open your app in the browser
- 2. Click an element → annotate it        ───►    3. Agent calls get_pending_work()
-    "Fix the padding on this card"                    sees your review + element metadata
-                                                  4. Agent calls find_source_file_tool()
-                                                      locates the component file
-                                                  5. Agent edits the code
-                                                  6. Agent calls resolve_review()
-                                          ◄───        review disappears from your list
+```mermaid
+sequenceDiagram
+    actor You as 👤 You
+    participant App as 🌐 Your App
+    actor AI as 🤖 AI Agent
+
+    You->>App: See something wrong? Click on it.
+    App-->>You: Write your feedback
+    You->>App: "This button should be blue"
+    App->>AI: Feedback + what you pointed at<br/>(element, styles, position — full context)
+    Note over AI: Finds the file, fixes the code
+    AI->>App: ✅ Done
+    App-->>You: Review disappears — it's fixed
 ```
 
 One Python process handles everything - MCP protocol for the agent (stdio) and REST API for the browser UI (HTTP). Reviews are stored in a SQLite database inside your project.
@@ -153,18 +155,16 @@ Every review can be tagged with a category:
 
 ## Architecture
 
-```
-┌──────────────┐  stdio (MCP)   ┌──────────────────────────┐
-│  AI Agent    │ ─────────────► │                          │
-│  (Claude,    │ ◄───────────── │  ui-ticket-mcp           │
-│   Codex,     │                │                          │──── SQLite
-│   Cursor)    │                │  MCP stdio  (10 tools)   │     {PROJECT}/.reviews/reviews.db
-└──────────────┘                │  REST API   :3200        │
-                                │                          │
-┌──────────────┐  HTTP REST     │  Single Python process   │
-│  Reviewer    │ ─────────────► │  (FastAPI + MCP SDK)     │
-│  (Browser)   │ ◄───────────── │                          │
-└──────────────┘                └──────────────────────────┘
+```mermaid
+graph LR
+    Agent["🤖 AI Agent<br/>(Claude, Codex, Cursor)"]
+    Browser["👤 Reviewer<br/>(Browser)"]
+    Server["ui-ticket-mcp<br/><i>Single Python process</i><br/>MCP stdio · 10 tools<br/>REST API · :3200"]
+    DB[("SQLite<br/>.reviews/reviews.db")]
+
+    Agent <-->|stdio MCP| Server
+    Browser <-->|HTTP REST| Server
+    Server --- DB
 ```
 
 - **MCP** (stdio) - Your agent framework starts it automatically. 10 tools for AI agents to read, resolve, and manage reviews.
@@ -248,14 +248,14 @@ Returns the full setup guide (MCP config, REST API, browser UI). Useful when the
 
 ### Typical agent workflow
 
-```
-1. get_pending_work()                    → see what needs attention
-2. get_annotated_reviews("user-profile") → get element metadata for context
-3. find_source_file_tool("user-profile") → locate the source files
-4. (agent reads and edits the code)
-5. resolve_review(1)                     → mark as done
-   — or —
-   batch_resolve("user-profile")         → mark all on page as done
+```mermaid
+graph TD
+    A["get_pending_work()"] -->|See what needs attention| B["get_annotated_reviews(page)"]
+    B -->|Get element metadata for context| C["find_source_file_tool(page)"]
+    C -->|Locate the source files| D["Read & edit the code"]
+    D --> E{Resolve}
+    E -->|Single| F["resolve_review(id)"]
+    E -->|All on page| G["batch_resolve(page)"]
 ```
 
 ---
