@@ -51,6 +51,8 @@ Restart the agent. `uvx` downloads and runs the package automatically - no manua
 
 When the MCP server starts, it also launches a REST API on `http://localhost:3200` (or your custom `REVIEW_PORT`) for the browser UI.
 
+> **Important:** The API always runs **locally** (`localhost`). The website `https://uiticket.0ics.ai/` is the landing page only — it is NOT an API endpoint. Always use `http://localhost:{PORT}/api` as the `api-url`.
+
 ### 2. Add the browser UI to your app
 
 ```bash
