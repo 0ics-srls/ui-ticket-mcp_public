@@ -2,6 +2,42 @@
 
 All notable changes to this project are documented here.
 
+## [1.1.2] - 2026-02-25
+
+### Added
+- README for ui-ticket-core and ui-ticket-panel npm packages
+- Website and GitHub links across all package READMEs
+
+### Fixed
+- PyPI project URLs now point to public repo and landing page
+
+## [1.1.1] - 2026-02-25
+
+### Added
+- Version badge in review panel header showing current library version
+
+## [1.1.0] - 2026-02-25
+
+### Added
+- Version check with auto-update notification toast in UI
+- `GET /api/version` endpoint for runtime version queries
+- Deploy protocol with version checklist
+
+### Changed
+- Batch marker positioning with GPU-accelerated transforms
+- Surgical render, tag borders, default "general" filter, better selectors
+- Tarball packaging to avoid Vite cache issues
+
+### Fixed
+- Widget blink: debounced render, parallel refresh, atomic DOM swap
+- Clamp badge position to visible portion of element in viewport
+- Live rect X-fix for marker positioning
+
+### Packages
+- `ui-ticket-mcp` 1.1.0 on [PyPI](https://pypi.org/project/ui-ticket-mcp/)
+- `ui-ticket-panel` 1.1.0 on [npm](https://www.npmjs.com/package/ui-ticket-panel)
+- `ui-ticket-core` 1.1.0 on [npm](https://www.npmjs.com/package/ui-ticket-core)
+
 ## [1.0.1] - 2026-02-24
 
 ### Added
