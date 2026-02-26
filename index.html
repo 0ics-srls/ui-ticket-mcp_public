@@ -829,6 +829,54 @@
       line-height: 1.5;
     }
 
+    /* ====== KEYBOARD SHORTCUTS ====== */
+    .shortcuts-section {
+      padding-top: 40px;
+      padding-bottom: 120px;
+    }
+    .shortcuts-header {
+      margin-bottom: 48px;
+    }
+    .shortcuts-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      max-width: 800px;
+    }
+    @media (max-width: 768px) {
+      .shortcuts-grid { grid-template-columns: 1fr; }
+    }
+    .shortcut-card {
+      padding: 24px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      text-align: center;
+      transition: all 0.25s;
+    }
+    .shortcut-card:hover {
+      border-color: rgba(34, 211, 238, 0.2);
+      background: rgba(17, 24, 39, 0.8);
+    }
+    .shortcut-kbd {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--cyan);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 14px;
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+    }
+    .shortcut-label {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
     /* ====== ARCHITECTURE ====== */
     .arch-section {
       padding-top: 40px;
@@ -1236,7 +1284,7 @@
             <span class="feature-icon">
               <svg width="28" height="28" fill="none" stroke="var(--green)" stroke-width="1.8"><path d="M4 14l5 5L24 5"/></svg>
             </span>
-            <h3>10 MCP Tools</h3>
+            <h3>11 MCP Tools</h3>
             <p>Everything your AI agent needs: review summaries, pending work, annotated reviews with element metadata, file finder, batch resolve, and more.</p>
           </div>
           <div class="feature-card reveal">
@@ -1259,6 +1307,31 @@
             </span>
             <h3>SQLite &amp; Git-Friendly</h3>
             <p>Reviews stored in <code style="font-family:var(--font-mono);font-size:11px;background:var(--bg-card);padding:2px 5px;border-radius:3px">.reviews/reviews.db</code> inside your project. WAL mode for concurrency. Commit to git to share with your team.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- KEYBOARD SHORTCUTS -->
+    <section class="shortcuts-section">
+      <div class="container">
+        <div class="shortcuts-header reveal">
+          <div class="section-label">Keyboard Shortcuts</div>
+          <h2 class="section-title">Fast by default</h2>
+          <p class="section-desc">Three shortcuts to master the entire workflow.</p>
+        </div>
+        <div class="shortcuts-grid">
+          <div class="shortcut-card reveal">
+            <div class="shortcut-kbd">Alt + A</div>
+            <div class="shortcut-label">Toggle annotation mode &mdash; click any element to annotate it</div>
+          </div>
+          <div class="shortcut-card reveal reveal-delay-1">
+            <div class="shortcut-kbd">Ctrl + Enter</div>
+            <div class="shortcut-label">Submit review or reply from any text field</div>
+          </div>
+          <div class="shortcut-card reveal reveal-delay-2">
+            <div class="shortcut-kbd">Escape</div>
+            <div class="shortcut-label">Close popup, exit annotation mode, or close the panel</div>
           </div>
         </div>
       </div>
