@@ -479,6 +479,68 @@
       }
     }
 
+    /* ====== PROMPTS ====== */
+    .prompts-section {
+      padding-top: 80px;
+      padding-bottom: 80px;
+      border-bottom: 1px solid var(--border);
+    }
+    .prompts-header { margin-bottom: 48px; }
+    .prompts-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    @media (max-width: 900px) {
+      .prompts-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .prompts-grid { grid-template-columns: 1fr; }
+    }
+    .prompt-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      transition: border-color 0.25s, transform 0.25s;
+    }
+    .prompt-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    .prompt-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .prompt-text {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--accent-bright);
+      line-height: 1.5;
+    }
+    .prompt-copy {
+      flex-shrink: 0;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px 6px;
+      display: flex;
+      align-items: center;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .prompt-copy:hover { color: var(--accent-bright); border-color: var(--accent); }
+    .prompt-copy.copied { color: var(--green); border-color: var(--green); }
+    .prompt-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
     /* ====== FEATURES ====== */
     .features-section {
       padding-top: 80px;
@@ -1005,7 +1067,7 @@
       <div class="hero-inner">
         <div class="hero-badge reveal">
           <span class="dot"></span>
-          v1.1.0 &mdash; now on PyPI &amp; npm
+          v1.1.2 &mdash; now on PyPI &amp; npm
         </div>
         <h1 class="reveal reveal-delay-1">
           You review.<br/><em>AI resolves.</em>
@@ -1081,6 +1143,61 @@
             </div>
             <h3>Code Fixed, Review Resolved</h3>
             <p>Agent edits the code, calls <code style="font-family:var(--font-mono);font-size:12px;background:var(--bg-card);padding:2px 6px;border-radius:4px">resolve_review()</code>, and the badge turns green. You see the fix in real time.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXAMPLE PROMPTS -->
+    <section class="prompts-section">
+      <div class="container">
+        <div class="prompts-header reveal">
+          <div class="section-label">Example Prompts</div>
+          <h2 class="section-title">Just tell your agent what to do</h2>
+          <p class="section-desc">No special syntax. No commands to memorize. Talk naturally.</p>
+        </div>
+        <div class="prompts-grid">
+          <div class="prompt-card reveal">
+            <div class="prompt-top">
+              <div class="prompt-text">"Check for pending reviews and fix them"</div>
+              <button class="prompt-copy" onclick="copyPrompt(this)" title="Copy prompt"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="5" width="9" height="9" rx="1.5"/><path d="M5 11H3.5A1.5 1.5 0 012 9.5v-6A1.5 1.5 0 013.5 2h6A1.5 1.5 0 0111 3.5V5"/></svg></button>
+            </div>
+            <div class="prompt-desc">Agent reads all open reviews, finds source files, edits code, and resolves each one.</div>
+          </div>
+          <div class="prompt-card reveal reveal-delay-1">
+            <div class="prompt-top">
+              <div class="prompt-text">"Fix all bugs on the dashboard"</div>
+              <button class="prompt-copy" onclick="copyPrompt(this)" title="Copy prompt"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="5" width="9" height="9" rx="1.5"/><path d="M5 11H3.5A1.5 1.5 0 012 9.5v-6A1.5 1.5 0 013.5 2h6A1.5 1.5 0 0111 3.5V5"/></svg></button>
+            </div>
+            <div class="prompt-desc">Filters reviews by page and tag, focuses on bugs, applies targeted fixes.</div>
+          </div>
+          <div class="prompt-card reveal reveal-delay-2">
+            <div class="prompt-top">
+              <div class="prompt-text">"What open reviews do I have?"</div>
+              <button class="prompt-copy" onclick="copyPrompt(this)" title="Copy prompt"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="5" width="9" height="9" rx="1.5"/><path d="M5 11H3.5A1.5 1.5 0 012 9.5v-6A1.5 1.5 0 013.5 2h6A1.5 1.5 0 0111 3.5V5"/></svg></button>
+            </div>
+            <div class="prompt-desc">Returns a summary of all pages with open and resolved counts.</div>
+          </div>
+          <div class="prompt-card reveal">
+            <div class="prompt-top">
+              <div class="prompt-text">"The spacing on user-profile is wrong &mdash; look at review #12"</div>
+              <button class="prompt-copy" onclick="copyPrompt(this)" title="Copy prompt"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="5" width="9" height="9" rx="1.5"/><path d="M5 11H3.5A1.5 1.5 0 012 9.5v-6A1.5 1.5 0 013.5 2h6A1.5 1.5 0 0111 3.5V5"/></svg></button>
+            </div>
+            <div class="prompt-desc">Reads the specific review with element metadata, locates the CSS, and fixes spacing.</div>
+          </div>
+          <div class="prompt-card reveal reveal-delay-1">
+            <div class="prompt-top">
+              <div class="prompt-text">"Resolve all reviews on the settings page"</div>
+              <button class="prompt-copy" onclick="copyPrompt(this)" title="Copy prompt"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="5" width="9" height="9" rx="1.5"/><path d="M5 11H3.5A1.5 1.5 0 012 9.5v-6A1.5 1.5 0 013.5 2h6A1.5 1.5 0 0111 3.5V5"/></svg></button>
+            </div>
+            <div class="prompt-desc">Batch-resolves every open review on the page after verifying fixes.</div>
+          </div>
+          <div class="prompt-card reveal reveal-delay-2">
+            <div class="prompt-top">
+              <div class="prompt-text">"Read the setup guide and add the review panel to my app"</div>
+              <button class="prompt-copy" onclick="copyPrompt(this)" title="Copy prompt"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="5" width="9" height="9" rx="1.5"/><path d="M5 11H3.5A1.5 1.5 0 012 9.5v-6A1.5 1.5 0 013.5 2h6A1.5 1.5 0 0111 3.5V5"/></svg></button>
+            </div>
+            <div class="prompt-desc">Agent calls get_setup_guide(), then configures everything automatically.</div>
           </div>
         </div>
       </div>
@@ -1456,6 +1573,19 @@
     window.addEventListener('scroll', () => {
       nav.classList.toggle('scrolled', window.scrollY > 20);
     }, { passive: true });
+
+    // Copy prompt
+    function copyPrompt(btn) {
+      const text = btn.closest('.prompt-top').querySelector('.prompt-text').textContent.replace(/^"|"$/g, '');
+      navigator.clipboard.writeText(text).then(() => {
+        btn.classList.add('copied');
+        btn.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l4 4L13 5"/></svg>';
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="5" width="9" height="9" rx="1.5"/><path d="M5 11H3.5A1.5 1.5 0 012 9.5v-6A1.5 1.5 0 013.5 2h6A1.5 1.5 0 0111 3.5V5"/></svg>';
+        }, 1500);
+      });
+    }
 
     // Copy code
     function copyCode(btn) {
