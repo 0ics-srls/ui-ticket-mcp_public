@@ -1199,6 +1199,13 @@
             </div>
             <div class="prompt-desc">Agent calls get_setup_guide(), then configures everything automatically.</div>
           </div>
+          <div class="prompt-card reveal">
+            <div class="prompt-top">
+              <div class="prompt-text">"Create a bug report for the broken date picker"</div>
+              <button class="prompt-copy" onclick="copyPrompt(this)" title="Copy prompt"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="5" width="9" height="9" rx="1.5"/><path d="M5 11H3.5A1.5 1.5 0 012 9.5v-6A1.5 1.5 0 013.5 2h6A1.5 1.5 0 0111 3.5V5"/></svg></button>
+            </div>
+            <div class="prompt-desc">Agent creates a GitHub issue with a descriptive title and body using create_github_issue().</div>
+          </div>
         </div>
       </div>
     </section>
@@ -1405,7 +1412,7 @@
       <div class="container">
         <div class="tools-header reveal">
           <div class="section-label">MCP Protocol</div>
-          <h2 class="section-title">10 tools for your AI agent</h2>
+          <h2 class="section-title">11 tools for your AI agent</h2>
           <p class="section-desc">Everything an agent needs to understand, locate, fix, and resolve UI review feedback.</p>
         </div>
         <div class="tools-list">
@@ -1469,6 +1476,12 @@
               <div class="tool-desc">Full setup instructions &mdash; useful when agent configures new projects</div>
             </div>
           </div>
+          <div class="tool-item reveal">
+            <div>
+              <div class="tool-name">create_github_issue()</div>
+              <div class="tool-desc">Create a GitHub issue (bug or enhancement) via gh CLI</div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -1495,7 +1508,7 @@
             <div class="arch-box-label" style="color:var(--accent)">Single process</div>
             <div class="arch-box-title">ui-ticket-mcp</div>
             <div class="arch-box-desc">
-              MCP Server (10 tools)<br/>
+              MCP Server (11 tools)<br/>
               REST API (:3200)<br/>
               <span style="font-family:var(--font-mono);font-size:12px;color:var(--text-muted)">FastAPI + MCP SDK</span>
             </div>
