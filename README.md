@@ -59,16 +59,20 @@ When the MCP server starts, it also launches a REST API on `http://localhost:320
 npm install ui-ticket-panel
 ```
 
-```html
-<script type="module">
-  import { defineReviewPanel } from 'ui-ticket-panel';
-  defineReviewPanel();
-</script>
+In your app's entry file (e.g. `main.ts`, `index.tsx`):
 
+```ts
+import { defineReviewPanel } from 'ui-ticket-panel';
+defineReviewPanel();
+```
+
+Then in your root template:
+
+```html
 <review-panel api-url="http://localhost:3200/api"></review-panel>
 ```
 
-That's it. Works in **any framework** - Angular, React, Vue, Svelte, or plain HTML. It's a standard Web Component.
+That's it. Works in **any framework** - Angular, React, Vue, Svelte, or plain HTML. It's a standard Web Component. For **SSR frameworks** (Next.js, Nuxt, SvelteKit) see the [Framework Examples](#framework-examples) section — you need a dynamic import on the client side.
 
 #### No bundler? Use CDN
 
@@ -368,10 +372,42 @@ This metadata gives the AI agent precise context about what you annotated - whic
 
 ## Web Component Attributes
 
-| Attribute | Default | Description |
-|-----------|---------|-------------|
-| `api-url` | `/api` | REST API base URL (e.g. `http://localhost:3200/api`) |
-| `page-id` | (auto from URL) | Page identifier for filtering reviews |
+| Attribute | Required | Description |
+|-----------|----------|-------------|
+| `api-url` | Yes | REST API base URL (e.g. `http://localhost:3200/api`) |
+| `page-id` | No | Explicit page identifier for filtering reviews. If omitted, auto-detection is used (recommended) |
+
+### Page identification
+
+The panel needs to know which page the user is on, so it can show and file reviews for that specific page. There are two modes:
+
+#### Automatic detection (recommended)
+
+When no `page-id` attribute is set, the panel derives the page identifier from the URL pathname:
+
+| URL | Page ID |
+|-----|---------|
+| `/` | `home` |
+| `/analytics` | `analytics` |
+| `/settings` | `settings` |
+| `/user/profile` | `user/profile` |
+
+The panel also listens for SPA navigation events (`pushState`, `replaceState`, `popstate`) and automatically reloads reviews when the route changes. This means it works out of the box with client-side routing in React Router, Vue Router, Angular Router, Next.js, etc.
+
+```html
+<!-- Auto-detection: no page-id attribute needed -->
+<review-panel api-url="http://localhost:3200/api"></review-panel>
+```
+
+#### Explicit page ID
+
+If you need to control the page ID yourself (e.g. your pages don't map cleanly to URL paths), set the `page-id` attribute:
+
+```html
+<review-panel api-url="http://localhost:3200/api" page-id="dashboard"></review-panel>
+```
+
+> **Important:** These two modes are mutually exclusive. When `page-id` is set, auto-detection is completely disabled — the panel will NOT react to route changes. Do not combine both.
 
 ### Programmatic API
 
@@ -467,6 +503,75 @@ defineReviewPanel();
 <script>
   import { defineReviewPanel } from 'ui-ticket-panel';
   defineReviewPanel();
+</script>
+
+<review-panel api-url="http://localhost:3200/api"></review-panel>
+```
+
+### Next.js (SSR)
+
+Web Components use `window` and `HTMLElement` which don't exist during server-side rendering. You must load the panel dynamically on the client side:
+
+```tsx
+// components/ReviewPanel.tsx
+'use client';
+import { useEffect } from 'react';
+
+export default function ReviewPanel() {
+  useEffect(() => {
+    import('ui-ticket-panel').then(m => m.defineReviewPanel());
+  }, []);
+  return <review-panel api-url="http://localhost:3200/api" />;
+}
+```
+
+Then use it in your root layout:
+
+```tsx
+// app/layout.tsx
+import ReviewPanel from './components/ReviewPanel';
+
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        {children}
+        <ReviewPanel />
+      </body>
+    </html>
+  );
+}
+```
+
+### Nuxt (SSR)
+
+```vue
+<template>
+  <ClientOnly>
+    <review-panel api-url="http://localhost:3200/api"></review-panel>
+  </ClientOnly>
+</template>
+
+<script setup>
+import { onMounted } from 'vue';
+
+onMounted(async () => {
+  const { defineReviewPanel } = await import('ui-ticket-panel');
+  defineReviewPanel();
+});
+</script>
+```
+
+### SvelteKit (SSR)
+
+```svelte
+<script>
+  import { onMount } from 'svelte';
+
+  onMount(async () => {
+    const { defineReviewPanel } = await import('ui-ticket-panel');
+    defineReviewPanel();
+  });
 </script>
 
 <review-panel api-url="http://localhost:3200/api"></review-panel>
