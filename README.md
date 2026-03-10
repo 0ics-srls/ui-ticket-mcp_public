@@ -442,13 +442,18 @@ panel.setPageId('dashboard');
 
 ## Framework Examples
 
-### Plain HTML (with bundler)
+### With a bundler
+
+In your entry file (e.g. `main.ts`, `main.js`):
+
+```ts
+import { defineReviewPanel } from 'ui-ticket-panel';
+defineReviewPanel();
+```
+
+Then in your HTML:
 
 ```html
-<script type="module">
-  import { defineReviewPanel } from 'ui-ticket-panel';
-  defineReviewPanel();
-</script>
 <review-panel api-url="http://localhost:3200/api"></review-panel>
 ```
 
