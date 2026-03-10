@@ -2,6 +2,44 @@
 
 All notable changes to this project are documented here.
 
+## [1.3.0] - 2026-03-10
+
+### Added
+- UrlObserver — singleton SPA navigation detector (patches pushState/replaceState + popstate)
+- Auto-detection of page ID from URL pathname (no `page-id` attribute needed)
+- Auto-reload reviews on SPA route changes (React Router, Vue Router, Next.js, etc.)
+- Review scope toggle — choose "This page" or "All pages" when adding a general review
+- SSR framework examples in setup guide and README (Next.js, Nuxt, SvelteKit)
+- Page identification documentation (auto-detection vs explicit `page-id`)
+
+### Fixed
+- Reviews disappearing on SPA navigation (page ID was resolved once on mount, never updated)
+- App-wide reviews (`page_id: 'general'`) now visible on all pages
+- Homepage page ID changed from `'general'` to `'home'` to avoid collision with app-wide reviews
+- Form re-render on route change (stale page label in scope toggle)
+- Setup guide: fixed bundler example (JS import instead of script tag)
+
+### Packages
+- `ui-ticket-mcp` 1.3.0 on [PyPI](https://pypi.org/project/ui-ticket-mcp/)
+- `ui-ticket-panel` 1.3.0 on [npm](https://www.npmjs.com/package/ui-ticket-panel)
+- `ui-ticket-core` 1.3.0 on [npm](https://www.npmjs.com/package/ui-ticket-core)
+
+## [1.2.0] - 2026-03-03
+
+### Added
+- ExampleModal component for contact form functionality
+- Example modal page with popup form
+- Keyboard shortcuts section on landing page
+- `create_github_issue` tool documented in README and landing page
+
+### Changed
+- Dashboard widget styling improvements
+
+### Packages
+- `ui-ticket-mcp` 1.2.0 on [PyPI](https://pypi.org/project/ui-ticket-mcp/)
+- `ui-ticket-panel` 1.2.0 on [npm](https://www.npmjs.com/package/ui-ticket-panel)
+- `ui-ticket-core` 1.2.0 on [npm](https://www.npmjs.com/package/ui-ticket-core)
+
 ## [1.1.2] - 2026-02-25
 
 ### Added
