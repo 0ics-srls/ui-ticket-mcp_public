@@ -2,6 +2,23 @@
 
 All notable changes to this project are documented here.
 
+## [1.4.0] - 2026-04-27
+
+### Added
+- **Draggable annotation popup** ([#4](https://github.com/0ics-srls/ui-ticket-mcp_public/issues/4)) — grab the popup by its grip handle and drag it anywhere. Useful when the popup covers the element you're commenting on.
+  - 6-dot grip icon on the header of new-annotation popups (edit popup is not draggable)
+  - Drag is constrained to the viewport while dragging
+  - After you let go, the popup keeps its position relative to the target — when you scroll, the popup follows the element with your chosen offset preserved
+  - Each new annotation starts fresh at the default position (no position carryover between sessions)
+
+### Fixed
+- **Radix DropdownMenu stealing focus in annotation mode** ([#3](https://github.com/0ics-srls/ui-ticket-mcp_public/issues/3)) — annotation mode now correctly captures clicks even on portal-rendered dropdown menus (Radix UI, Headless UI, etc.) without losing the target element
+
+### Packages
+- `ui-ticket-mcp` 1.4.0 on [PyPI](https://pypi.org/project/ui-ticket-mcp/)
+- `ui-ticket-panel` 1.4.0 on [npm](https://www.npmjs.com/package/ui-ticket-panel)
+- `ui-ticket-core` 1.4.0 on [npm](https://www.npmjs.com/package/ui-ticket-core)
+
 ## [1.3.0] - 2026-03-10
 
 ### Added
