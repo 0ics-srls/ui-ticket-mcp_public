@@ -747,6 +747,96 @@
       font-style: italic;
     }
 
+    /* ====== DEMO VIDEO ====== */
+    .demo-section {
+      padding-top: 40px;
+      padding-bottom: 120px;
+    }
+    .demo-header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+    .demo-header .section-desc { margin: 0 auto; }
+    .demo-card {
+      display: block;
+      max-width: 800px;
+      margin: 0 auto;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.3s;
+    }
+    .demo-card:hover {
+      border-color: rgba(245, 158, 11, 0.3);
+      transform: translateY(-3px);
+      box-shadow: 0 24px 48px -16px rgba(0, 0, 0, 0.5);
+    }
+    .demo-thumb {
+      position: relative;
+      aspect-ratio: 16 / 9;
+      background: var(--bg-card);
+      overflow: hidden;
+    }
+    .demo-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.5s ease;
+    }
+    .demo-card:hover .demo-thumb img {
+      transform: scale(1.04);
+    }
+    .demo-overlay {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(180deg, rgba(6, 8, 13, 0.1) 0%, rgba(6, 8, 13, 0.55) 100%);
+      pointer-events: none;
+    }
+    .demo-play {
+      width: 84px;
+      height: 84px;
+      display: grid;
+      place-items: center;
+      background: rgba(245, 158, 11, 0.95);
+      border-radius: 50%;
+      box-shadow: 0 16px 48px rgba(245, 158, 11, 0.45);
+      transition: transform 0.25s;
+    }
+    .demo-card:hover .demo-play {
+      transform: scale(1.08);
+    }
+    .demo-play svg {
+      width: 36px;
+      height: 36px;
+      color: #06080d;
+      margin-left: 4px;
+    }
+    .demo-meta {
+      padding: 22px 26px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .demo-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .demo-link {
+      font-size: 13px;
+      color: var(--accent);
+      font-family: var(--font-mono);
+      white-space: nowrap;
+    }
+
     /* ====== FRAMEWORKS ====== */
     .frameworks-section {
       padding-top: 40px;
@@ -1100,6 +1190,7 @@
     <nav id="nav">
       <a href="#" class="nav-brand" style="text-decoration:none">ui-ticket-mcp</a>
       <ul class="nav-links">
+        <li><a href="#demo">Demo</a></li>
         <li><a href="#how">How it works</a></li>
         <li><a href="#features">Features</a></li>
         <li><a href="#quickstart">Quick Start</a></li>
@@ -1154,6 +1245,38 @@
             <div class="line" style="animation-delay:3.9s"><span class="output">&nbsp; <span class="accent">Resolved review #4 on user-profile.</span></span></div>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- DEMO VIDEO -->
+    <section class="demo-section" id="demo">
+      <div class="container">
+        <div class="demo-header reveal">
+          <div class="section-label">Demo</div>
+          <h2 class="section-title">See it in action</h2>
+          <p class="section-desc">A short walkthrough of the full review-and-resolve workflow.</p>
+        </div>
+        <a class="demo-card reveal"
+           href="https://www.youtube.com/watch?v=sfdgDJ_jEJc&amp;t=84s"
+           target="_blank"
+           rel="noopener noreferrer">
+          <div class="demo-thumb">
+            <img src="https://i.ytimg.com/vi/sfdgDJ_jEJc/maxresdefault.jpg"
+                 alt="ui-ticket-mcp demo video"
+                 loading="lazy"
+                 referrerpolicy="no-referrer"
+                 onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/sfdgDJ_jEJc/hqdefault.jpg';" />
+            <div class="demo-overlay">
+              <div class="demo-play">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+              </div>
+            </div>
+          </div>
+          <div class="demo-meta">
+            <div class="demo-title">Review &rarr; Resolve workflow</div>
+            <div class="demo-link">Watch on YouTube &rarr;</div>
+          </div>
+        </a>
       </div>
     </section>
 
