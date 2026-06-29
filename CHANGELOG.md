@@ -2,6 +2,22 @@
 
 All notable changes to this project are documented here.
 
+## [1.5.0] - 2026-06-29
+
+### Added
+- **Ticket Hub** — a new optional hosted mode that lets several projects send their reviews to one central place instead of each keeping its own local database
+  - Web dashboard to manage projects, access keys, and browse tickets across all your projects
+  - Secure login and per-project API keys, with full or read-only access
+  - Self-hostable with Docker (dashboard + API in a single image)
+- **Hub mode for the panel** — point `<review-panel>` at a hub with the new `api-url` and `project-key` attributes; viewing, replying, editing and deleting reviews all work against the hub
+- **Hub mode for the MCP server** — the server now works automatically against either your local setup or a hub
+- **Migration** — move your existing local reviews into a hub
+
+### Packages
+- `ui-ticket-mcp` 1.5.0 on [PyPI](https://pypi.org/project/ui-ticket-mcp/)
+- `ui-ticket-panel` 1.5.0 on [npm](https://www.npmjs.com/package/ui-ticket-panel)
+- `ui-ticket-core` 1.5.0 on [npm](https://www.npmjs.com/package/ui-ticket-core)
+
 ## [1.4.0] - 2026-04-27
 
 ### Added
