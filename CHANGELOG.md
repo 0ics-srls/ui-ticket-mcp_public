@@ -2,6 +2,24 @@
 
 All notable changes to this project are documented here.
 
+## [1.6.0] - 2026-06-30
+
+### Added
+- **Ticket numbers** — reviews now show a friendly per-project number (#1, #2, …) instead of a long internal id, on the badges, in the panel list, and in the dashboard
+- **Review detail view** — click a review to open a full detail with all its info and a comment thread where you can read and add comments
+
+### Changed
+- Resolved review markers are now **hidden by default** — toggle them on with the eye button when you need them
+
+### Fixed
+- Reply box: the **Send** button now activates as soon as you start typing (no need to reopen the panel)
+- Reopening the panel now starts with a clean filter
+
+### Packages
+- `ui-ticket-mcp` 1.6.0 on [PyPI](https://pypi.org/project/ui-ticket-mcp/)
+- `ui-ticket-panel` 1.6.0 on [npm](https://www.npmjs.com/package/ui-ticket-panel)
+- `ui-ticket-core` 1.6.0 on [npm](https://www.npmjs.com/package/ui-ticket-core)
+
 ## [1.5.0] - 2026-06-29
 
 ### Added
