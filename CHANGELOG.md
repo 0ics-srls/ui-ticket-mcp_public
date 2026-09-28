@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here.
 
+## [1.6.1] - 2026-09-28
+
+### Fixed
+- **Server failed to start after a fresh install** (`ModuleNotFoundError: No module named 'mcp.server.fastmcp'`). New installs were picking up version 2 of the `mcp` library, which renamed the API the server used. ui-ticket-mcp now works with both `mcp` 1.x and 2.x
+
 ## [1.6.0] - 2026-06-30
 
 ### Added
