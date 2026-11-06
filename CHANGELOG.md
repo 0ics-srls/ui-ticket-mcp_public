@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented here.
 
+## [1.6.2] - 2026-11-06
+
+### Fixed
+- **Central hub mode now really reads from the hub** — with `UI_TICKET_API_URL` and `UI_TICKET_PROJECT_KEY` set, all ticket tools read and update tickets on the hub instead of a local database, and no local database is created.
+- **Pending work and batch resolve work in hub mode**, and tickets can be resolved and reopened by their number (#1, #2, …).
+- **Clear messages when the hub has a problem** — an invalid key, an unreachable hub or a wrong URL now say so instead of a generic error or an empty list.
+
 ## [1.6.1] - 2026-09-28
 
 ### Fixed
